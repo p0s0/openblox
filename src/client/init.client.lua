@@ -20,7 +20,9 @@ function Init()
     local time = DateTime.now().UnixTimestampMillis
     print("OPENBLOX by p0s_0 at p0s0/openblox on github - Preparing simulation " .. tostring(year) .. tostring(yearType) .. " for " .. player.Name)
     CreateRobloxGui()
+    
     print("OPENBLOX by p0s_0 at p0s0/openblox on github - Prepared simulation " .. tostring(year) .. tostring(yearType) .. " for " .. player.Name .. " in " .. tostring(DateTime.now().UnixTimestampMillis - time) .. "ms")
+
 end
 
 Init()

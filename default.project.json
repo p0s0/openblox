@@ -23,6 +23,12 @@
       }
     },
 
+    "ServerStorage": {
+      "Common": {
+        "$path": "src/servershared"
+      }
+    },
+
     "Workspace": {
       "$properties": {
         "FilteringEnabled": true
