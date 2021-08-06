@@ -2,16 +2,33 @@
 -- init.server.lua - prepare everything
 
 local ss = game.ServerStorage
-local coreScripts = ss:WaitForChild("CoreScripts")
+local rs = game.ReplicatedStorage
+local coreScripts = rs:WaitForChild("CoreScripts")
 local simulationFolderHolder = ss:WaitForChild("SimulationFolders")
 
 -- Change these 2 variables below, depending on where you place these values & what you call them. If you don't understand this, DYOR before using this.
 local year = ss:WaitForChild("SimulationYear")
 local yearType = ss:WaitForChild("SimulationYearType")
 
-local eventFunctionFolder = game.ReplicatedStorage:WaitForChild("OPENBLOXEF")
-eventFunctionFolder:WaitForChild("GetYear").OnServerInvoke = function() return year.Value end
-eventFunctionFolder:WaitForChild("GetYearType").OnServerInvoke = function() return yearType.Value end
+local eventFunctionFolder = rs:WaitForChild("OPENBLOXEF")
+eventFunctionFolder:WaitForChild("GetYear").OnServerInvoke = function(plr) return year.Value end
+eventFunctionFolder:WaitForChild("GetYearType").OnServerInvoke = function(plr) return yearType.Value end
+eventFunctionFolder:WaitForChild("CheckForCoreScript").OnServerInvoke = function(plr, coreName)
+    if not coreName then return end
+    if coreName == "" then return end
+    print("CHECKOK")
+    if coreScripts:FindFirstChild(coreName) then return true else return false end
+end
+
+eventFunctionFolder:WaitForChild("GetCoreScript").OnServerInvoke = function(plr, coreName, parent)
+    print(tostring(coreName))
+    if not coreName then return end
+    if coreName == "" then return end
+    print("GETOK")
+    local coreScript = coreScripts[coreName]:Clone()
+    coreScript.Parent = parent
+    if coreScripts:FindFirstChild(coreName) then return coreScript else return false end
+end
 
 local simulationFolder
 
@@ -20,10 +37,9 @@ if simulationFolderHolder:FindFirstChild(tostring(year.Value) .. tostring(yearTy
 end
 
 function extractFolder(folderToExtract, extractTo)
-    if not folderToExtract or extractTo then return end
-
     for v,i in pairs(folderToExtract:GetChildren()) do
         i.Parent = extractTo
+        print(tostring(i.Parent))
     end
 
     folderToExtract:Destroy()
@@ -36,12 +52,13 @@ function LoadSimulation(folder)
         elseif i.Name == "StarterPlayerScripts" or i.Name == "StarterCharacterScripts" then
             i.Parent = game.StarterPlayer[i.Name]
         elseif i.Name == "CoreScripts" then
+            print("OK")
             extractFolder(i, coreScripts)
         else
             i.Parent = game[i.Name]
         end
 
-        for b,o in pairs(i:GetDescendants()) do
+        for b,o in pairs(coreScripts:GetDescendants()) do
             if o:IsA("Script") or o:IsA("LocalScript") and o.Disabled == true then
                 o.Disabled = false
             end
